@@ -7,6 +7,7 @@ import com.example.todo_springboot.entity.User;
 import com.example.todo_springboot.exception.TodoAPIException;
 import com.example.todo_springboot.repository.RoleRepository;
 import com.example.todo_springboot.repository.UserRepository;
+import com.example.todo_springboot.security.JwtTokenProvider;
 import com.example.todo_springboot.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,18 +29,19 @@ public class AuthServiceImpl implements AuthService {
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Override
     public String register(RegisterDto registerDto) {
 
-        // Check username is already exists in database
-        if(userRepository.existsByUsername(registerDto.getUsername())) {
-            throw new TodoAPIException(HttpStatus.BAD_REQUEST, "Username already exist");
+        // check username is already exists in database
+        if(userRepository.existsByUsername(registerDto.getUsername())){
+            throw new TodoAPIException(HttpStatus.BAD_REQUEST, "Username already exists!");
         }
 
-        // Check Email is already exists in database
-        if(userRepository.existsByEmail(registerDto.getEmail())) {
-            throw new TodoAPIException(HttpStatus.BAD_REQUEST, "Email already exists");
+        // check email is already exists in database
+        if(userRepository.existsByEmail(registerDto.getEmail())){
+            throw new TodoAPIException(HttpStatus.BAD_REQUEST, "Email is already exists!.");
         }
 
         User user = new User();
@@ -51,10 +53,12 @@ public class AuthServiceImpl implements AuthService {
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByName("ROLE_USER");
         roles.add(userRole);
+
         user.setRoles(roles);
 
         userRepository.save(user);
-        return "User registered successfully";
+
+        return "User Registered Successfully!.";
     }
 
     @Override
@@ -66,6 +70,9 @@ public class AuthServiceImpl implements AuthService {
         ));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return "Logged in successfully";
+
+        String token = jwtTokenProvider.generateToken(authentication);
+
+        return token;
     }
 }

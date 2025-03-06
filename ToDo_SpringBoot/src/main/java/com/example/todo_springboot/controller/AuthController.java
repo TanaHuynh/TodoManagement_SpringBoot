@@ -1,5 +1,6 @@
 package com.example.todo_springboot.controller;
 
+import com.example.todo_springboot.dto.JwtAuthenResponse;
 import com.example.todo_springboot.dto.LoginDto;
 import com.example.todo_springboot.dto.RegisterDto;
 import com.example.todo_springboot.service.AuthService;
@@ -25,8 +26,12 @@ public class AuthController {
 
     // Build Login REST API
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDto loginDto) {
-        String response = authService.login(loginDto);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<JwtAuthenResponse> login(@RequestBody LoginDto loginDto) {
+        String token = authService.login(loginDto);
+
+        JwtAuthenResponse jwtAuthenResponse = new JwtAuthenResponse();
+        jwtAuthenResponse.setAccessToken(token);
+
+        return new ResponseEntity<>(jwtAuthenResponse, HttpStatus.OK);
     }
 }
